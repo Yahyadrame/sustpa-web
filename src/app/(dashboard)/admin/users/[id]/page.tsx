@@ -252,10 +252,9 @@ export default function UserDetailPage() {
                     "—"
                   }
                 />
-                {/* CORRECTION BUG 15 : filiere (pas field) */}
                 <InfoRow
                   label="Filière"
-                  value={user.studentProfile.filiere ?? "—"}
+                  value={user.studentProfile.field ?? "—"}
                 />
               </CardContent>
             </Card>
@@ -279,17 +278,14 @@ export default function UserDetailPage() {
                     "—"
                   }
                 />
-                {/* CORRECTION BUG 17 : specialite (pas specialty) */}
                 <InfoRow
                   label="Spécialité"
-                  value={user.teacherProfile.specialite ?? "—"}
+                  value={user.teacherProfile.specialty ?? "—"}
                 />
-                {/* CORRECTION BUG 18 : department supprimé — n'existe pas dans DB */}
                 <InfoRow
                   label="Plafond projets"
                   value={`${user.teacherProfile.maxProjects ?? 5} projets max`}
                 />
-                {/* Niveau supervisé — affiché uniquement si RESPONSIBLE */}
                 {user.teacherProfile.responsibleLevel && (
                   <InfoRow
                     label="Niveau supervisé"

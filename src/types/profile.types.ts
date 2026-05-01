@@ -19,14 +19,14 @@ export interface StudentProfileData {
   userId: string;
   matricule: string;
   level: string;
-  filiere: string;
+  field: string; // CORRECTION: field (pas filiere)
 }
 
 export interface TeacherProfileData {
   id: string;
   userId: string;
   grade: string;
-  specialite: string;
+  specialty: string; // CORRECTION: specialty (pas specialite)
   maxProjects: number;
   responsibleLevel?: string;
 }

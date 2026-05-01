@@ -1,60 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Eye,
-  EyeOff,
-  LogIn,
-  CheckCircle2,
-  AlertCircle,
-  Mail,
-  Lock,
-} from "lucide-react";
+import { Eye, EyeOff, LogIn, CheckCircle2, AlertCircle } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { loginSchema, type LoginFormValues } from "@/lib/validators";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-/* ── Séparateur "ou" ── */
-function Divider({ label }: { label: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        margin: "4px 0",
-      }}
-    >
-      <div style={{ flex: 1, height: 1, background: "#E8ECF0" }} />
-      <span
-        style={{
-          fontSize: 12,
-          color: "#94a3b8",
-          fontWeight: 500,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {label}
-      </span>
-      <div style={{ flex: 1, height: 1, background: "#E8ECF0" }} />
-    </div>
-  );
-}
-
 export default function LoginPage() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const passwordChanged = searchParams.get("changed") === "true";
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -75,442 +39,301 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="space-y-6"
-      style={{ animation: "fadeInUp 0.28s cubic-bezier(0.16,1,0.3,1)" }}
-    >
-      {/* ── Titre ── */}
-      <div style={{ marginBottom: 8 }}>
-        <h2
-          style={{
-            fontSize: 28,
-            fontWeight: 800,
-            color: "#0f172a",
-            letterSpacing: "-0.04em",
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
-          Sign in
-        </h2>
-        <p
-          style={{
-            fontSize: 13.5,
-            color: "#64748b",
-            marginTop: 6,
-            lineHeight: 1.5,
-          }}
-        >
-          Connectez-vous à votre espace SUSTPA
-        </p>
-      </div>
+    <>
+      <style>{`
+        .login-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 32px;
+          font-weight: 800;
+          color: #111827;
+          letter-spacing: -0.04em;
+          line-height: 1.1;
+          margin: 0 0 6px;
+        }
+        .login-sub {
+          font-size: 13.5px;
+          color: #94a3b8;
+          font-weight: 500;
+          margin: 0 0 32px;
+        }
+        .input-row { display: flex; flex-direction: column; gap: 14px; }
+        .field-wrap { position: relative; }
+        .field-label {
+          display: block;
+          font-size: 12px;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+        .auth-input {
+          width: 100%;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 10px;
+          padding: 11px 40px 11px 16px;
+          font-size: 14px;
+          color: #111827;
+          background: #f9fafb;
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s;
+          font-family: 'DM Sans', sans-serif;
+          box-sizing: border-box;
+        }
+        .auth-input:focus {
+          border-color: #1B8A5A;
+          box-shadow: 0 0 0 3px rgba(27,138,90,0.10);
+          background: #fff;
+        }
+        .auth-input.err { border-color: #fca5a5; }
+        .auth-input.err:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+        .input-icon-r {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #9ca3af;
+          display: flex;
+          align-items: center;
+          padding: 0;
+        }
+        .input-icon-r:hover { color: #374151; }
+        .field-err {
+          font-size: 11px;
+          color: #ef4444;
+          margin-top: 4px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
 
-      {/* ── Feedbacks ── */}
+        /* Divider */
+        .or-divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 20px 0;
+          color: #d1d5db;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+        }
+        .or-divider::before, .or-divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: #f0f0f0;
+        }
+
+        /* Lien bas */
+        .bottom-link {
+          text-align: center;
+          font-size: 12.5px;
+          color: #94a3b8;
+          margin-top: 20px;
+        }
+        .bottom-link a {
+          color: #1B8A5A;
+          font-weight: 600;
+          text-decoration: none;
+        }
+        .bottom-link a:hover { text-decoration: underline; }
+
+        /* Alert */
+        .auth-alert {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border-radius: 10px;
+          padding: 10px 14px;
+          font-size: 13px;
+          margin-bottom: 20px;
+          position: relative;
+          overflow: hidden;
+          animation: slideUp 0.22s cubic-bezier(0.16,1,0.3,1);
+        }
+        .auth-alert .bar {
+          position: absolute;
+          left: 0; top: 0; bottom: 0;
+          width: 3px;
+          border-radius: 10px 0 0 10px;
+        }
+        .auth-alert.success { background: #f0fdf4; border: 1px solid #a8e9cb; color: #166534; }
+        .auth-alert.success .bar { background: #1B8A5A; }
+        .auth-alert.error   { background: #fff1f2; border: 1px solid #fecaca; color: #991b1b; }
+        .auth-alert.error   .bar { background: #ef4444; }
+
+        /* Remember row */
+        .remember-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 4px;
+        }
+        .remember-label {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          font-size: 13px;
+          color: #374151;
+          cursor: pointer;
+          font-weight: 500;
+        }
+        .remember-label input { accent-color: #1B8A5A; width: 14px; height: 14px; cursor: pointer; }
+        .forgot-link {
+          font-size: 12.5px;
+          color: #1B8A5A;
+          font-weight: 600;
+          text-decoration: none;
+        }
+        .forgot-link:hover { text-decoration: underline; }
+      `}</style>
+
+      {/* Titre */}
+      <h1 className="login-title">Connexion</h1>
+      <p className="login-sub">Accédez à votre espace académique</p>
+
+      {/* Alertes */}
       {passwordChanged && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            background: "#f0fdf4",
-            border: "1px solid #a8e9cb",
-            borderRadius: 10,
-            padding: "11px 14px",
-            fontSize: 13,
-            color: "#166534",
-            position: "relative",
-            overflow: "hidden",
-            animation: "slideUp 0.22s ease-out",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: 3,
-              background: "#1B8A5A",
-              borderRadius: "4px 0 0 4px",
-            }}
-          />
-          <CheckCircle2
-            size={15}
-            color="#1B8A5A"
-            style={{ flexShrink: 0, marginLeft: 4 }}
-          />
-          <span style={{ fontWeight: 500 }}>
-            Mot de passe mis à jour. Reconnectez-vous.
-          </span>
+        <div className="auth-alert success">
+          <div className="bar" />
+          <CheckCircle2 size={15} style={{ marginLeft: 6, flexShrink: 0 }} />
+          Mot de passe mis à jour. Reconnectez-vous.
         </div>
       )}
-
       {serverError && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            background: "#fff1f2",
-            border: "1px solid #fecaca",
-            borderRadius: 10,
-            padding: "11px 14px",
-            fontSize: 13,
-            color: "#991b1b",
-            position: "relative",
-            overflow: "hidden",
-            animation: "slideUp 0.22s ease-out",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: 3,
-              background: "#ef4444",
-              borderRadius: "4px 0 0 4px",
-            }}
-          />
-          <AlertCircle
-            size={15}
-            color="#ef4444"
-            style={{ flexShrink: 0, marginLeft: 4 }}
-          />
-          <span>{serverError}</span>
+        <div className="auth-alert error">
+          <div className="bar" />
+          <AlertCircle size={15} style={{ marginLeft: 6, flexShrink: 0 }} />
+          {serverError}
         </div>
       )}
 
-      {/* ── Formulaire ── */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        style={{ display: "flex", flexDirection: "column", gap: 14 }}
-      >
-        {/* User Name */}
-        <div>
-          <label
-            style={{
-              display: "block",
-              fontSize: 12.5,
-              fontWeight: 600,
-              color: "#374151",
-              marginBottom: 6,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            User Name
-          </label>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              border: `1.5px solid ${errors.email ? "#fca5a5" : "#e2e8f0"}`,
-              borderRadius: 8,
-              padding: "0 14px",
-              background: "#fafafa",
-              transition: "all 0.15s",
-            }}
-            onFocusCapture={(e) => {
-              e.currentTarget.style.borderColor = "#1B8A5A";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 3px rgba(27,138,90,0.10)";
-              e.currentTarget.style.background = "#fff";
-            }}
-            onBlurCapture={(e) => {
-              e.currentTarget.style.borderColor = errors.email
-                ? "#fca5a5"
-                : "#e2e8f0";
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.background = "#fafafa";
-            }}
-          >
-            <Mail size={15} color="#9ca3af" style={{ flexShrink: 0 }} />
+      {/* Formulaire */}
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="input-row">
+          {/* Email */}
+          <div className="field-wrap">
+            <label className="field-label">Adresse email</label>
             <input
               type="email"
-              placeholder="User Name"
-              style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-                background: "transparent",
-                padding: "11px 0",
-                fontSize: 14,
-                color: "#0f172a",
-                fontFamily: "'DM Sans',sans-serif",
-              }}
+              placeholder="vous@universite.sn"
+              autoComplete="email"
+              className={`auth-input${errors.email ? " err" : ""}`}
               {...register("email")}
             />
+            {errors.email && (
+              <p className="field-err">
+                <span
+                  style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: "#ef4444",
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }}
+                />
+                {errors.email.message}
+              </p>
+            )}
           </div>
-          {errors.email && (
-            <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>
-              {errors.email.message}
-            </p>
-          )}
-        </div>
 
-        {/* Password */}
-        <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 6,
-            }}
-          >
-            <label
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#374151",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              style={{
-                fontSize: 12,
-                color: "#1B8A5A",
-                fontWeight: 600,
-                textDecoration: "none",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.textDecoration =
-                  "underline";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.textDecoration =
-                  "none";
-              }}
-            >
-              Forgot Password?
-            </Link>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              border: `1.5px solid ${errors.password ? "#fca5a5" : "#e2e8f0"}`,
-              borderRadius: 8,
-              padding: "0 14px",
-              background: "#fafafa",
-              transition: "all 0.15s",
-            }}
-            onFocusCapture={(e) => {
-              e.currentTarget.style.borderColor = "#1B8A5A";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 3px rgba(27,138,90,0.10)";
-              e.currentTarget.style.background = "#fff";
-            }}
-            onBlurCapture={(e) => {
-              e.currentTarget.style.borderColor = errors.password
-                ? "#fca5a5"
-                : "#e2e8f0";
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.background = "#fafafa";
-            }}
-          >
-            <Lock size={15} color="#9ca3af" style={{ flexShrink: 0 }} />
+          {/* Mot de passe */}
+          <div className="field-wrap">
+            <label className="field-label">Mot de passe</label>
             <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-                background: "transparent",
-                padding: "11px 0",
-                fontSize: 14,
-                color: "#0f172a",
-                fontFamily: "'DM Sans',sans-serif",
-              }}
+              type={showPwd ? "text" : "password"}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              className={`auth-input${errors.password ? " err" : ""}`}
               {...register("password")}
             />
             <button
               type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#1B8A5A",
-                fontWeight: 700,
-                fontSize: 12,
-                padding: 0,
-              }}
+              className="input-icon-r"
+              onClick={() => setShowPwd((v) => !v)}
+              aria-label={showPwd ? "Masquer" : "Afficher"}
             >
-              {showPassword ? <EyeOff size={16} /> : "SHOW"}
+              {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
-          </div>
-          {errors.password && (
-            <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        {/* Remember me */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div
-            onClick={() => setRememberMe((v) => !v)}
-            style={{
-              width: 16,
-              height: 16,
-              borderRadius: 4,
-              border: `2px solid ${rememberMe ? "#1B8A5A" : "#cbd5e1"}`,
-              background: rememberMe ? "#1B8A5A" : "#fff",
-              cursor: "pointer",
-              flexShrink: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.15s",
-            }}
-          >
-            {rememberMe && (
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path
-                  d="M1.5 5L4 7.5L8.5 2.5"
-                  stroke="white"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            {errors.password && (
+              <p className="field-err">
+                <span
+                  style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: "#ef4444",
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }}
                 />
-              </svg>
+                {errors.password.message}
+              </p>
             )}
           </div>
-          <span
-            style={{ fontSize: 13, color: "#374151", cursor: "pointer" }}
-            onClick={() => setRememberMe((v) => !v)}
-          >
-            Remember me
-          </span>
         </div>
 
-        {/* Bouton Sign in */}
-        <button
+        {/* Remember + Forgot */}
+        <div className="remember-row" style={{ marginTop: 14 }}>
+          <label className="remember-label">
+            <input type="checkbox" />
+            Se souvenir de moi
+          </label>
+          <Link href="/forgot-password" className="forgot-link">
+            Mot de passe oublié ?
+          </Link>
+        </div>
+
+        {/* Bouton connexion */}
+        <Button
           type="submit"
-          disabled={isSubmitting}
+          size="lg"
+          className="w-full"
+          isLoading={isSubmitting}
           style={{
-            width: "100%",
-            padding: "13px 0",
-            borderRadius: 8,
-            border: "none",
-            background: isSubmitting ? "#4caf7d" : "#0f2a6e",
-            color: "#fff",
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: isSubmitting ? "not-allowed" : "pointer",
-            letterSpacing: "0.02em",
-            fontFamily: "'DM Sans',sans-serif",
-            transition: "all 0.2s",
-            opacity: isSubmitting ? 0.8 : 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-          }}
-          onMouseEnter={(e) => {
-            if (!isSubmitting) {
-              const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "#1a3d8a";
-              b.style.transform = "translateY(-1px)";
-              b.style.boxShadow = "0 4px 16px rgba(15,42,110,0.35)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            const b = e.currentTarget as HTMLButtonElement;
-            b.style.background = isSubmitting ? "#4caf7d" : "#0f2a6e";
-            b.style.transform = "none";
-            b.style.boxShadow = "none";
+            marginTop: 22,
+            borderRadius: 10,
+            fontFamily: "'DM Sans', sans-serif",
           }}
         >
-          {isSubmitting ? (
-            <svg
-              style={{ animation: "spin 0.9s linear infinite" }}
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="rgba(255,255,255,0.3)"
-                strokeWidth="3"
-              />
-              <path
-                d="M12 2a10 10 0 0110 10"
-                stroke="#fff"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-            </svg>
-          ) : (
-            <LogIn size={16} />
-          )}
-          {isSubmitting ? "Connexion…" : "Sing in"}
-        </button>
+          {!isSubmitting && <LogIn size={16} />}
+          {isSubmitting ? "Connexion…" : "Se connecter"}
+        </Button>
 
-        <Divider label="Or" />
+        {/* Divider */}
+        <div className="or-divider">Ou</div>
 
         {/* Bouton secondaire */}
         <button
           type="button"
+          disabled
           style={{
             width: "100%",
-            padding: "12px 0",
-            borderRadius: 8,
-            border: "2px solid #0f2a6e",
+            padding: "11px 0",
+            borderRadius: 10,
+            border: "1.5px solid #e5e7eb",
             background: "#fff",
-            color: "#0f2a6e",
+            color: "#94a3b8",
             fontSize: 14,
-            fontWeight: 700,
-            cursor: "pointer",
-            letterSpacing: "0.01em",
-            fontFamily: "'DM Sans',sans-serif",
-            transition: "all 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            const b = e.currentTarget as HTMLButtonElement;
-            b.style.background = "#f0f4ff";
-          }}
-          onMouseLeave={(e) => {
-            const b = e.currentTarget as HTMLButtonElement;
-            b.style.background = "#fff";
+            fontWeight: 600,
+            cursor: "not-allowed",
+            fontFamily: "'DM Sans', sans-serif",
+            letterSpacing: "-0.01em",
           }}
         >
-          Sing in with other
+          Connexion SSO institutionnel
         </button>
       </form>
 
-      {/* Bas de formulaire */}
-      <p style={{ textAlign: "center", fontSize: 12.5, color: "#64748b" }}>
-        Don&apos;t have an account?{" "}
-        <span style={{ color: "#1B8A5A", fontWeight: 700, cursor: "pointer" }}>
-          Sign Up
-        </span>
-        <span
-          style={{
-            fontSize: 11,
-            color: "#94a3b8",
-            display: "block",
-            marginTop: 4,
-          }}
-        >
-          Votre compte est créé par l&apos;administrateur de
-          l&apos;établissement.
-        </span>
-      </p>
-
-      <style>{`@keyframes spin { to { transform:rotate(360deg); } }`}</style>
-    </div>
+      {/* Bas de page */}
+      <div className="bottom-link">
+        Pas encore de compte ? <a href="#">Contactez l&apos;admin</a>
+      </div>
+    </>
   );
 }

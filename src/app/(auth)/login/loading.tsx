@@ -2,22 +2,62 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginLoading() {
   return (
-    <div className="w-full max-w-md space-y-8 animate-fade-in">
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-72" />
-      </div>
-      <div className="space-y-5">
-        <div className="space-y-1.5">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-11 w-full" />
+    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      {/* Titre */}
+      <Skeleton className="h-8 w-40 rounded-lg" style={{ marginBottom: 6 }} />
+      <Skeleton className="h-4 w-56 rounded-md" style={{ marginBottom: 28 }} />
+
+      {/* Champs */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          <Skeleton
+            className="h-3 w-24 rounded-md"
+            style={{ marginBottom: 6 }}
+          />
+          <Skeleton className="h-11 w-full rounded-[10px]" />
         </div>
-        <div className="space-y-1.5">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-11 w-full" />
+        <div>
+          <Skeleton
+            className="h-3 w-28 rounded-md"
+            style={{ marginBottom: 6 }}
+          />
+          <Skeleton className="h-11 w-full rounded-[10px]" />
         </div>
-        <Skeleton className="h-11 w-full rounded-lg" />
       </div>
+
+      {/* Remember row */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: 14,
+        }}
+      >
+        <Skeleton className="h-4 w-32 rounded-md" />
+        <Skeleton className="h-4 w-28 rounded-md" />
+      </div>
+
+      {/* Bouton */}
+      <Skeleton
+        className="h-11 w-full rounded-[10px]"
+        style={{ marginTop: 22 }}
+      />
+
+      {/* Divider */}
+      <Skeleton
+        className="h-4 w-8 rounded-md mx-auto"
+        style={{ marginTop: 20, marginBottom: 20 }}
+      />
+
+      {/* Bouton secondaire */}
+      <Skeleton className="h-11 w-full rounded-[10px]" />
+
+      {/* Bas */}
+      <Skeleton
+        className="h-4 w-48 rounded-md mx-auto"
+        style={{ marginTop: 20 }}
+      />
     </div>
   );
 }

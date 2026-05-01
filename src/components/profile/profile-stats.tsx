@@ -24,7 +24,7 @@ const isTeacherProfile = (profile: unknown): profile is TeacherProfileData => {
     typeof profile === "object" &&
     profile !== null &&
     "grade" in profile &&
-    "specialite" in profile
+    "specialty" in profile
   );
 };
 
@@ -145,11 +145,11 @@ export function ProfileStats({ profile }: ProfileStatsProps) {
                 }
               />
             )}
-            {studentProfile.filiere && (
+            {studentProfile.field && (
               <StatRow
                 icon={<BookOpen className="h-3.5 w-3.5" />}
                 label="Filière"
-                value={studentProfile.filiere}
+                value={studentProfile.field}
               />
             )}
           </>
@@ -167,11 +167,11 @@ export function ProfileStats({ profile }: ProfileStatsProps) {
                 }
               />
             )}
-            {teacherProfile.specialite && (
+            {teacherProfile.specialty && (
               <StatRow
                 icon={<Shield className="h-3.5 w-3.5" />}
                 label="Spécialité"
-                value={teacherProfile.specialite}
+                value={teacherProfile.specialty}
               />
             )}
             {teacherProfile.maxProjects && (

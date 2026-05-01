@@ -23,6 +23,7 @@ const badgeVariants = cva(
         danger: "bg-red-50     text-red-700      ring-red-200",
         info: "bg-blue-50    text-blue-700     ring-blue-200",
         violet: "bg-violet-50  text-violet-700   ring-violet-200",
+        accent: "bg-indigo-50 text-indigo-700 ring-indigo-200",
         /* ── Statuts projets ─────────────────────────────── */
         proposition: "bg-violet-50  text-violet-700   ring-violet-200",
         en_cours: "bg-blue-50    text-blue-700     ring-blue-200",
@@ -60,6 +61,7 @@ const DOT_COLOR: Record<string, string> = {
   danger: "bg-red-500",
   info: "bg-blue-500",
   violet: "bg-violet-500",
+  accent: "bg-indigo-500",
   proposition: "bg-violet-500",
   en_cours: "bg-blue-500",
   soumis: "bg-amber-500",

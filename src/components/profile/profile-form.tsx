@@ -30,23 +30,23 @@ const isTeacherProfile = (profile: unknown): profile is TeacherProfileData => {
     typeof profile === "object" &&
     profile !== null &&
     "grade" in profile &&
-    "specialite" in profile
+    "specialty" in profile
   );
 };
 
 // ─── Schema Zod aligné sur les colonnes DB réelles ───────────────────────────
-// student_profiles : matricule, level, filiere
-// teacher_profiles : grade, specialite, maxProjects
+// student_profiles : matricule, level, field
+// teacher_profiles : grade, specialty, maxProjects
 const schema = z.object({
   firstName: z.string().min(2, "Minimum 2 caractères"),
   lastName: z.string().min(2, "Minimum 2 caractères"),
   // Étudiant
   level: z.string().optional(),
-  filiere: z.string().optional(),
+  field: z.string().optional(),
   matricule: z.string().optional(),
   // Enseignant
   grade: z.string().optional(),
-  specialite: z.string().optional(),
+  specialty: z.string().optional(),
   maxProjects: z.number().int().min(1).max(20).optional(),
   responsibleLevel: z.string().optional(),
 });
@@ -106,10 +106,10 @@ export function ProfileForm({ profile, saving, onSubmit }: ProfileFormProps) {
       firstName: profile.firstName,
       lastName: profile.lastName,
       level: studentProfile?.level ?? "",
-      filiere: studentProfile?.filiere ?? "",
+      field: studentProfile?.field ?? "",
       matricule: studentProfile?.matricule ?? "",
       grade: teacherProfile?.grade ?? "",
-      specialite: teacherProfile?.specialite ?? "",
+      specialty: teacherProfile?.specialty ?? "",
       maxProjects: teacherProfile?.maxProjects ?? 5,
       responsibleLevel: teacherProfile?.responsibleLevel ?? "",
     },
@@ -127,10 +127,10 @@ export function ProfileForm({ profile, saving, onSubmit }: ProfileFormProps) {
       firstName: profile.firstName,
       lastName: profile.lastName,
       level: newStudentProfile?.level ?? "",
-      filiere: newStudentProfile?.filiere ?? "",
+      field: newStudentProfile?.field ?? "",
       matricule: newStudentProfile?.matricule ?? "",
       grade: newTeacherProfile?.grade ?? "",
-      specialite: newTeacherProfile?.specialite ?? "",
+      specialty: newTeacherProfile?.specialty ?? "",
       maxProjects: newTeacherProfile?.maxProjects ?? 5,
       responsibleLevel: newTeacherProfile?.responsibleLevel ?? "",
     });
@@ -146,11 +146,11 @@ export function ProfileForm({ profile, saving, onSubmit }: ProfileFormProps) {
     if (data.lastName) payload.lastName = data.lastName;
     if (isStudent && studentProfile) {
       if (data.level) payload.level = data.level;
-      if (data.filiere) payload.filiere = data.filiere;
+      if (data.field) payload.field = data.field;
     }
     if (isTeacher && teacherProfile) {
       if (data.grade) payload.grade = data.grade;
-      if (data.specialite) payload.specialite = data.specialite;
+      if (data.specialty) payload.specialty = data.specialty;
       if (data.maxProjects) payload.maxProjects = data.maxProjects;
     }
     await onSubmit(payload);
@@ -204,7 +204,7 @@ export function ProfileForm({ profile, saving, onSubmit }: ProfileFormProps) {
             <Input
               label="Filière"
               placeholder="Informatique"
-              {...register("filiere")}
+              {...register("field")}
             />
             {studentProfile?.matricule && (
               <Input
@@ -235,7 +235,7 @@ export function ProfileForm({ profile, saving, onSubmit }: ProfileFormProps) {
             <Input
               label="Spécialité"
               placeholder="Génie Logiciel"
-              {...register("specialite")}
+              {...register("specialty")}
             />
             <Input
               label="Plafond de projets simultanés"

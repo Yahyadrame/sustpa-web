@@ -4,21 +4,18 @@ import type { UserProfile } from "@/types/profile.types";
 export const profileApi = {
   getMyProfile: () => api.get<UserProfile>("/profile").then((r) => r.data),
 
-  // CORRECTION BUG 6+7 : noms de champs alignés sur le schema DB réel
-  // filiere (pas field), specialite (pas specialty)
-  // department et promotion supprimés — colonnes inexistantes en DB
-  // maxProjects en number (pas string)
+  // CORRECTION: field (pas filiere), specialty (pas specialite)
   updateMyProfile: (
     data: Partial<{
       firstName: string;
       lastName: string;
       // Étudiant
       level: string;
-      filiere: string; // CORRECTION : filiere (pas field)
+      field: string; // CORRECTION: field (pas filiere)
       // Enseignant
       grade: string;
-      specialite: string; // CORRECTION : specialite (pas specialty)
-      maxProjects: number; // CORRECTION : number (pas string)
+      specialty: string; // CORRECTION: specialty (pas specialite)
+      maxProjects: number;
     }>,
   ) => api.patch<UserProfile>("/profile", data).then((r) => r.data),
 

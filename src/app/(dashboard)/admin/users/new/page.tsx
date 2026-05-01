@@ -18,8 +18,8 @@ import { Alert } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
 // ─── Schema Zod — aligné sur le schéma DB réel ────────────────────────────────
-// Colonnes student_profiles : matricule, level, filiere (pas field/promotion)
-// Colonnes teacher_profiles : grade, specialite (pas specialty/department)
+// Colonnes student_profiles : matricule, level, field
+// Colonnes teacher_profiles : grade, specialty, max_projects
 const schema = z
   .object({
     firstName: z.string().min(2, "Minimum 2 caractères"),
@@ -30,12 +30,11 @@ const schema = z
     // Étudiant — correspond aux colonnes student_profiles
     matricule: z.string().optional(),
     level: z.string().optional(),
-    filiere: z.string().optional(), // CORRECTION BUG 12 : filiere (pas field)
+    field: z.string().optional(), // CORRECTION: field (pas filiere)
 
     // Enseignant — correspond aux colonnes teacher_profiles
     grade: z.string().optional(),
-    specialite: z.string().optional(), // CORRECTION BUG 13 : specialite (pas specialty)
-    // CORRECTION BUG 14 : coerce.number pour convertir l'input HTML (string) en number
+    specialty: z.string().optional(), // CORRECTION: specialty (pas specialite)
     maxProjects: z
       .string()
       .regex(/^\d+$/)
@@ -221,11 +220,10 @@ export default function NewUserPage() {
                 value={levelValue ?? ""}
                 onChange={(v) => setValue("level", v)}
               />
-              {/* CORRECTION BUG 12 : filiere (pas field) */}
               <Input
                 label="Filière"
                 placeholder="Informatique"
-                {...register("filiere")}
+                {...register("field")}
               />
             </CardContent>
           </Card>
@@ -251,13 +249,11 @@ export default function NewUserPage() {
                 value={gradeValue ?? ""}
                 onChange={(v) => setValue("grade", v)}
               />
-              {/* CORRECTION BUG 13 : specialite (pas specialty) */}
               <Input
                 label="Spécialité"
                 placeholder="Génie Logiciel"
-                {...register("specialite")}
+                {...register("specialty")}
               />
-              {/* CORRECTION BUG 14 : type number + coerce dans le schema Zod */}
               <Input
                 label="Plafond de projets simultanés"
                 type="number"
