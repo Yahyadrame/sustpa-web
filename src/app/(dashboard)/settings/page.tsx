@@ -1,36 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Lock, Palette } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import { PageHeader } from "@/components/ui/page-header";
-import { NotificationSettings } from "@/components/settings/notification-settings";
 import { SecuritySettings } from "@/components/settings/security-settings";
-import { AppearanceSettings } from "@/components/settings/appearance-settings";
 import { cn } from "@/lib/utils";
 
-type TabKey = "notifications" | "security" | "appearance";
+type TabKey = "security";
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  {
-    key: "notifications",
-    label: "Notifications",
-    icon: <Bell className="h-4 w-4" />,
-  },
   {
     key: "security",
     label: "Sécurité",
     icon: <Lock className="h-4 w-4" />,
   },
-  {
-    key: "appearance",
-    label: "Apparence",
-    icon: <Palette className="h-4 w-4" />,
-  },
 ];
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>("notifications");
+  const [activeTab, setActiveTab] = useState<TabKey>("security");
 
   return (
     <div className="max-w-2xl space-y-6 animate-fade-in">
@@ -64,9 +52,7 @@ export default function SettingsPage() {
 
       {/* Contenu */}
       <div className="animate-fade-in">
-        {activeTab === "notifications" && <NotificationSettings />}
         {activeTab === "security" && <SecuritySettings />}
-        {activeTab === "appearance" && <AppearanceSettings />}
       </div>
     </div>
   );

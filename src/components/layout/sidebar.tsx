@@ -87,7 +87,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: "Soutenances",
         href: "/defense",
         icon: <GraduationCap className="h-4 w-4" />,
-        roles: ["TEACHER", "RESPONSIBLE", "JURY_MEMBER"],
+        roles: ["STUDENT", "TEACHER", "RESPONSIBLE", "JURY_MEMBER"],
       },
     ],
   },

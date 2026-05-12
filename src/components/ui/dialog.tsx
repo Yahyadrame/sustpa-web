@@ -77,7 +77,7 @@ export function Dialog({
       {/* Panel */}
       <div
         className={cn(
-          "relative w-full bg-white rounded-2xl",
+          "relative w-full bg-white rounded-2xl flex flex-col max-h-[90vh]",
           "border border-[#E8ECF0]",
           "shadow-[0_24px_48px_-12px_rgb(0_0_0/0.18),0_0_0_1px_rgb(0_0_0/0.04)]",
           SIZES[size],
@@ -90,7 +90,7 @@ export function Dialog({
       >
         {/* Header */}
         {(title || description) && (
-          <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-[#E8ECF0]">
+          <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-[#E8ECF0] shrink-0">
             <div className="space-y-1 pr-4 min-w-0">
               {title && (
                 <h2
@@ -140,7 +140,7 @@ export function Dialog({
         )}
 
         {/* Contenu */}
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );

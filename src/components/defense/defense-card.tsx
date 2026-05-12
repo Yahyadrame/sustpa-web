@@ -48,8 +48,8 @@ export function DefenseCard({ defense, userRole, onGrade, onAssignJury, classNam
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-800 truncate tracking-[-0.02em]">
-            {(defense.project as { title: string } | undefined)?.title ?? "Projet"}
+          <p className="text-sm font-semibold text-slate-800 tracking-[-0.02em]">
+            {(defense.project as { title: string } | undefined)?.title || "Projet sans titre"}
           </p>
           <span
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold mt-1"

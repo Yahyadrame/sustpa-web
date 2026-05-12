@@ -3,6 +3,7 @@ import type {
   AdminStats,
   AuditLogsResponse,
   BulkActionPayload,
+  ResponsibleLevel,
 } from "@/types/admin.types";
 import type { AppRole } from "@/types/auth.types";
 
@@ -17,8 +18,14 @@ export const adminApi = {
       .then((r) => r.data),
 
   // Changer le rôle
-  changeRole: (userId: string, role: AppRole) =>
-    api.patch(`/admin/users/${userId}/role`, { role }).then((r) => r.data),
+  changeRole: (
+    userId: string,
+    role: AppRole,
+    responsibleLevel?: ResponsibleLevel,
+  ) =>
+    api
+      .patch(`/admin/users/${userId}/role`, { role, responsibleLevel })
+      .then((r) => r.data),
 
   // Forcer reset password
   forceResetPassword: (userId: string) =>

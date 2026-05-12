@@ -142,9 +142,10 @@ export default function UserDetailPage() {
             <RoleAssigner
               userId={user.id}
               currentRole={user.role}
+              currentResponsibleLevel={user.teacherProfile?.responsibleLevel}
               userName={`${user.firstName} ${user.lastName}`}
-              onConfirm={async (uid, role) => {
-                await changeRole(uid, role, refresh);
+              onConfirm={async (uid, role, responsibleLevel) => {
+                await changeRole(uid, role, responsibleLevel as any, refresh);
               }}
             />
           </div>

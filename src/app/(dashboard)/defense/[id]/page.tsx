@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { defenseApi }  from "@/services/defense.service";
+import { profileApi }  from "@/services/profile.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useToast }    from "@/components/ui/toast";
 import { Badge }       from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import { Separator }   from "@/components/ui/separator";
 import { Avatar }      from "@/components/ui/avatar";
 import { GradeForm }   from "@/components/defense/grade-form";
 import { AssignJuryModal } from "@/components/defense/assign-jury-modal";
+import { EditDefenseModal } from "@/components/defense/edit-defense-modal";
 import { PageHeader }  from "@/components/ui/page-header";
 import { formatDate }  from "@/lib/utils";
 import type { Defense, AssignJuryPayload } from "@/types/defense.types";
@@ -47,21 +49,27 @@ const JURY_ROLE_CFG: Record<string, { bg: string; text: string; border: string }
 export default function DefenseDetailPage() {
   const { id }   = useParams<{ id: string }>();
   const router   = useRouter();
-  const user     = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
+  const [profile, setProfile] = useState<any>(null);
+  const isHead = ["RESPONSIBLE", "ADMIN"].includes(user?.role ?? "");
+  const isJury = user?.role === "JURY_MEMBER";
   const toast    = useToast();
   const toastRef = useRef(toast);
 
-  useEffect(() => { toastRef.current = toast; }, [toast]);
+  useEffect(() => {
+    profileApi.getMyProfile().then(setProfile).catch(console.error);
+  }, []);
 
   const [defense,          setDefense]          = useState<Defense | null>(null);
   const [loading,          setLoading]          = useState(true);
   const [refreshKey,       setRefreshKey]       = useState(0);
   const [showGrade,        setShowGrade]        = useState(false);
   const [assignJuryModal,  setAssignJuryModal]  = useState(false);
+  const [editDefenseModal, setEditDefenseModal] = useState(false);
   const [generatingPV,     setGeneratingPV]     = useState(false);
-
-  const isHead = ["RESPONSIBLE", "ADMIN"].includes(user?.role ?? "");
-  const isJury = user?.role === "JURY_MEMBER";
+  
+  // Strict Logic: Can manage only if Admin or the specific Responsable for this project type
+  const canManagePV = defense?.canManagePV ?? false;
 
   const refresh = useCallback(() => { setLoading(true); setRefreshKey((k) => k + 1); }, []);
 
@@ -113,11 +121,11 @@ export default function DefenseDetailPage() {
 
       {/* ── En-tête ── */}
       <PageHeader
-        title={project?.title ?? "Soutenance"}
+        title={project?.title || "Soutenance sans titre"}
         breadcrumb={[
           { label: "Dashboard",    href: "/dashboard" },
           { label: "Soutenances", href: "/defense"    },
-          { label: project?.title ?? "Soutenance" },
+          { label: project?.title || "Détails" },
         ]}
         badge={
           <div className="flex items-center gap-2 flex-wrap">
@@ -139,10 +147,10 @@ export default function DefenseDetailPage() {
                 {defense.jury?.length ? "Modifier le jury" : "Affecter le jury"}
               </Button>
             )}
-            {(isJury || isHead) && !hasGrade && !upcoming && (
+            {(user?.role === "ADMIN" || defense.jury?.some((j) => j.teacherId === user?.id && j.juryRole === "PRESIDENT")) && !hasGrade && !upcoming && (
               <Button variant="primary" size="sm" onClick={() => setShowGrade((v) => !v)}>
                 <Star className="h-4 w-4" />
-                {isHead ? "Note finale" : "Ma note"}
+                Saisir note finale
               </Button>
             )}
           </div>
@@ -205,7 +213,7 @@ export default function DefenseDetailPage() {
           )}
 
           {/* Procès-verbal — PHASE 9 */}
-          {(hasGrade || hasMinutes) && isHead && (
+          {canManagePV && (hasGrade || hasMinutes) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -253,7 +261,7 @@ export default function DefenseDetailPage() {
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-slate-700 tracking-[-0.01em]">Générer le procès-verbal officiel</p>
                       <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                        Le PDF contiendra les informations du jury, les notes individuelles, la note finale et les remarques.
+                        Le PDF contiendra les informations du jury, la note finale et les remarques.
                       </p>
                       {!hasGrade && (
                         <p className="text-xs font-semibold mt-1.5" style={{ color: "#b45309" }}>
@@ -272,35 +280,6 @@ export default function DefenseDetailPage() {
             </Card>
           )}
 
-          {/* PV pour jury/enseignant non-head */}
-          {hasMinutes && !isHead && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-primary-50 flex items-center justify-center">
-                    <FileText className="h-3.5 w-3.5 text-primary-600" />
-                  </div>
-                  Procès-verbal
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <a
-                  href={minutesStreamUrl}
-                  download={`pv_soutenance_${id}.pdf`}
-                  className="flex items-center gap-3 p-4 rounded-xl transition-all hover:-translate-y-0.5"
-                  style={{ background: "#edfaf4", border: "1px solid #a8e9cb" }}
-                >
-                  <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#d2f4e4" }}>
-                    <Download className="h-5 w-5 text-primary-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-slate-800 tracking-[-0.01em]">Télécharger le procès-verbal</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Document officiel au format PDF</p>
-                  </div>
-                </a>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Jury */}
           <Card>
@@ -385,12 +364,19 @@ export default function DefenseDetailPage() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-[#F6F8FA] flex items-center justify-center">
-                  <Info className="h-3.5 w-3.5 text-slate-500" />
-                </div>
-                Informations
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-[#F6F8FA] flex items-center justify-center">
+                    <Info className="h-3.5 w-3.5 text-slate-500" />
+                  </div>
+                  Informations
+                </CardTitle>
+                {isHead && (
+                  <Button variant="ghost" size="sm" onClick={() => setEditDefenseModal(true)}>
+                    Modifier
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-0 text-sm">
               {[
@@ -438,6 +424,16 @@ export default function DefenseDetailPage() {
         supervisorId={supervisorId}
         onClose={() => setAssignJuryModal(false)}
         onSubmit={handleAssignJury}
+      />
+
+      {/* Modal édition soutenance */}
+      <EditDefenseModal
+        open={editDefenseModal}
+        defenseId={id}
+        initialDate={defense.scheduledAt}
+        initialRoom={defense.room ?? ""}
+        onClose={() => setEditDefenseModal(false)}
+        onSuccess={refresh}
       />
     </div>
   );

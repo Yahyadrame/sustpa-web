@@ -13,6 +13,10 @@ export const defenseApi = {
   create: (data: { projectId: string; scheduledAt: string; room: string }) =>
     api.post<Defense>("/defense", data).then((r) => r.data),
 
+  // ─── Modifier une soutenance ──────────────────────────────────────────────
+  update: (id: string, data: { scheduledAt?: string; room?: string }) =>
+    api.patch<Defense>(`/defense/${id}`, data).then((r) => r.data),
+
   // ─── Affecter le jury ────────────────────────────────────────────────────
   assignJury: (id: string, payload: AssignJuryPayload) =>
     api.patch(`/defense/${id}/jury`, payload).then((r) => r.data),

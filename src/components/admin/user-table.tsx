@@ -12,11 +12,16 @@ import { BulkActionsBar } from "./bulk-actions-bar";
 import { cn } from "@/lib/utils";
 import type { UserDetail } from "@/types/user.types";
 import type { AppRole } from "@/types/auth.types";
+import type { ResponsibleLevel } from "@/types/admin.types";
 
 interface UserTableProps {
   users: UserDetail[];
   currentUserId: string;
-  onRoleChange: (userId: string, role: AppRole) => Promise<void>;
+  onRoleChange: (
+    userId: string,
+    role: AppRole,
+    responsibleLevel?: ResponsibleLevel,
+  ) => Promise<void>;
   onStatusToggle: (userId: string, isActive: boolean) => Promise<void>;
   onResetPassword: (userId: string) => Promise<void>;
   onBulkActivate: (ids: string[]) => void;
@@ -170,8 +175,8 @@ export function UserTable({
                           userId={u.id}
                           currentRole={u.role}
                           userName={`${u.firstName} ${u.lastName}`}
-                          onConfirm={async (id, role) => {
-                            await onRoleChange(id, role);
+                          onConfirm={async (id, role, responsibleLevel) => {
+                            await onRoleChange(id, role, responsibleLevel as any);
                             onRefresh();
                           }}
                         />

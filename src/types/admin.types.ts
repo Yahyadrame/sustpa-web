@@ -1,5 +1,7 @@
 import type { AppRole } from "./auth.types";
 
+export type ResponsibleLevel = 'LICENCE' | 'MASTER' | 'DOCTORAL';
+
 export interface AdminStats {
   totalUsers: number;
   activeUsers: number;

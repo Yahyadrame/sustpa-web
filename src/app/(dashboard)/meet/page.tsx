@@ -144,7 +144,7 @@ export default function MeetPage() {
             title="Confirmées"
             value={sessions.filter((s) => s.isConfirmed).length}
             icon={<CheckCircle2 className="h-5 w-5" />}
-            variant="success"
+            variant="primary"
           />
           <StatCard
             title="Archivées"

@@ -215,6 +215,16 @@ export default function SubjectDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!id || !confirm("Êtes-vous sûr de vouloir supprimer ce sujet ?")) return;
+    try {
+      await api.delete(`/projects/subjects/${id}`);
+      router.push("/subjects");
+    } catch {
+      setError("Impossible de supprimer le sujet.");
+    }
+  };
+
   const handleReviewApplication = async (
     appId: string,
     status: "ACCEPTED" | "REJECTED",
@@ -316,29 +326,41 @@ export default function SubjectDetailPage() {
             }}
           >
             {/* Badges type + statut */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                style={{
-                  background: typeCfg.bg,
-                  color: typeCfg.text,
-                  border: `1px solid ${typeCfg.border}`,
-                }}
-              >
-                <Tag className="h-3 w-3" />
-                {typeCfg.label}
-              </span>
-              <span
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                style={{
-                  background: stsCfg.bg,
-                  color: stsCfg.text,
-                  border: `1px solid ${stsCfg.border}`,
-                }}
-              >
-                {stsCfg.icon}
-                {stsCfg.label}
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                  style={{
+                    background: typeCfg.bg,
+                    color: typeCfg.text,
+                    border: `1px solid ${typeCfg.border}`,
+                  }}
+                >
+                  <Tag className="h-3 w-3" />
+                  {typeCfg.label}
+                </span>
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                  style={{
+                    background: stsCfg.bg,
+                    color: stsCfg.text,
+                    border: `1px solid ${stsCfg.border}`,
+                  }}
+                >
+                  {stsCfg.icon}
+                  {stsCfg.label}
+                </span>
+              </div>
+              {isOwner && subject.validationStatus === "REJECTED" && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => void handleDelete()}
+                >
+                  Supprimer
+                </Button>
+              )}
             </div>
 
             {/* Titre + date */}

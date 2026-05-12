@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { adminApi } from "@/services/admin.service";
 import { useToast } from "@/components/ui/toast";
 // CORRECTION 1 : AuditLog retiré — importé mais jamais utilisé dans ce fichier
-import type { AdminStats, AuditLogsResponse } from "@/types/admin.types";
+import type { AdminStats, AuditLogsResponse, ResponsibleLevel } from "@/types/admin.types";
 import type { AppRole } from "@/types/auth.types";
 
 // ─── Hook stats admin ───────────────────────────────────────────────────────
@@ -63,10 +63,11 @@ export function useAdminActions() {
   const changeRole = async (
     userId: string,
     role: AppRole,
+    responsibleLevel?: ResponsibleLevel,
     onSuccess?: () => void,
   ) => {
     try {
-      await adminApi.changeRole(userId, role);
+      await adminApi.changeRole(userId, role, responsibleLevel);
       toast.success("Rôle mis à jour avec succès");
       onSuccess?.();
     } catch {

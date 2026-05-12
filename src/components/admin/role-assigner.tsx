@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Shield } from "lucide-react";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import type { AppRole } from "@/types/auth.types";
 interface RoleAssignerProps {
   userId: string;
   currentRole: AppRole;
+  currentResponsibleLevel?: string;
   userName: string;
   // ✅ CORRIGÉ — onConfirm accepte responsibleLevel optionnel
   onConfirm: (
@@ -56,29 +57,41 @@ const ROLE_LABELS: Record<string, string> = {
 export function RoleAssigner({
   userId,
   currentRole,
+  currentResponsibleLevel,
   userName,
   onConfirm,
 }: RoleAssignerProps) {
   const [open, setOpen] = useState(false);
   const [newRole, setNewRole] = useState<AppRole>(currentRole);
-  const [responsibleLevel, setResponsibleLevel] = useState<string>("");
+  const [responsibleLevel, setResponsibleLevel] = useState<string>(
+    currentResponsibleLevel ?? "",
+  );
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setNewRole(currentRole);
+    setResponsibleLevel(currentResponsibleLevel ?? "");
+  }, [currentRole, currentResponsibleLevel]);
 
   const isResponsible = newRole === "RESPONSIBLE";
 
-  // ✅ Bouton Confirmer désactivé si RESPONSIBLE sans niveau sélectionné
+  // ✅ Bouton Confirmer activé si le rôle a changé (ou si rôle=RESPONSIBLE et niveau défini)
   const canConfirm =
-    newRole !== currentRole &&
-    (newRole !== "RESPONSIBLE" || responsibleLevel !== "");
+    newRole !== currentRole ||
+    (newRole === "RESPONSIBLE" && responsibleLevel !== (currentResponsibleLevel ?? ""));
 
   const handleOpen = () => {
     setNewRole(currentRole);
-    setResponsibleLevel("");
+    setResponsibleLevel(currentResponsibleLevel ?? "");
     setOpen(true);
   };
 
   const handleConfirm = async () => {
-    if (newRole === currentRole) {
+    // Permettre la confirmation si le rôle change OU si le niveau de responsabilité change pour un RESPONSABLE
+    const roleChanged = newRole !== currentRole;
+    const levelChanged = isResponsible && responsibleLevel !== (currentResponsibleLevel ?? "");
+
+    if (!roleChanged && !levelChanged) {
       setOpen(false);
       return;
     }
@@ -156,20 +169,20 @@ export function RoleAssigner({
               (ex : un pour Licence, un pour Master).
             </div>
           )}
-
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setOpen(false)}>
-              Annuler
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              isLoading={loading}
-              disabled={!canConfirm}
-            >
-              Confirmer
-            </Button>
-          </DialogFooter>
         </div>
+
+        <DialogFooter className="mt-6">
+          <Button variant="secondary" onClick={() => setOpen(false)}>
+            Annuler
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            isLoading={loading}
+            disabled={!canConfirm}
+          >
+            Confirmer
+          </Button>
+        </DialogFooter>
       </Dialog>
     </>
   );

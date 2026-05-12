@@ -11,6 +11,7 @@ export interface Defense {
   minutesUrl: string | null;
   createdAt: string;
   updatedAt: string;
+  canManagePV: boolean;
   jury?: JuryMember[];
   project?: {
     id: string;

@@ -142,12 +142,12 @@ export function DeliverableCard({
 
       {/* Actions */}
       <div
-        className="flex items-center gap-1.5 pt-3"
+        className="flex items-center gap-1.5 pt-3 flex-wrap"
         style={{ borderTop: `1px solid ${cfg.border}` }}
       >
         <Link
           href={`/deliverables/${deliverable.id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors text-slate-600 hover:text-primary-700"
+          className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors text-slate-600 hover:text-primary-700 whitespace-nowrap"
           style={{ background: "#FFFFFF66" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "#FFFFFF";
@@ -163,7 +163,7 @@ export function DeliverableCard({
         <a
           href={streamUrl}
           download={deliverable.title}
-          className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors text-slate-600 hover:text-primary-700"
+          className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors text-slate-600 hover:text-primary-700 whitespace-nowrap"
           style={{ background: "#FFFFFF66" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "#FFFFFF";
@@ -178,11 +178,11 @@ export function DeliverableCard({
 
         {/* Approuver / Réviser — canReview TEACHER/RESPONSIBLE */}
         {canReview && deliverable.status === "PENDING" && (
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => onApprove?.(deliverable.id)}
-              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg text-white transition-all hover:shadow-sm active:scale-[0.97]"
+              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg text-white transition-all hover:shadow-sm active:scale-[0.97] whitespace-nowrap"
               style={{
                 background: "linear-gradient(135deg, #1B8A5A, #156e48)",
               }}
@@ -193,7 +193,7 @@ export function DeliverableCard({
             <button
               type="button"
               onClick={() => onRequestRevision?.(deliverable.id)}
-              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg text-white transition-all hover:shadow-sm active:scale-[0.97]"
+              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg text-white transition-all hover:shadow-sm active:scale-[0.97] whitespace-nowrap"
               style={{ background: "#d97706" }}
             >
               <RotateCcw className="h-3 w-3" />

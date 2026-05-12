@@ -11,6 +11,7 @@ import {
   EyeOff,
   CheckCircle2,
   AlertTriangle,
+  Mail,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -26,8 +27,10 @@ const passwordSchema = z
       .string()
       .min(8, "Au moins 8 caractères")
       .regex(/[A-Z]/, "Au moins une majuscule")
-      .regex(/[0-9]/, "Au moins un chiffre"),
+      .regex(/[0-9]/, "Au moins un chiffre")
+      .regex(/[@$!%*?&]/, "Au moins un caractère spécial"),
     confirmPassword: z.string(),
+    otpCode: z.string().length(6, "Le code doit contenir 6 chiffres"),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
     message: "Les mots de passe ne correspondent pas",
@@ -41,6 +44,7 @@ export function SecuritySettings() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isOtpRequested, setIsOtpRequested] = useState(false);
 
   const {
     register,
@@ -49,16 +53,27 @@ export function SecuritySettings() {
     formState: { errors, isSubmitting },
   } = useForm<PasswordForm>({ resolver: zodResolver(passwordSchema) });
 
+  const requestOtp = async () => {
+    try {
+      await api.post("/auth/request-otp-change");
+      setIsOtpRequested(true);
+      toast.success("Code de sécurité envoyé à votre email");
+    } catch {
+      toast.error("Erreur lors de l'envoi du code");
+    }
+  };
+
   const onSubmit = async (data: PasswordForm) => {
     try {
-      await api.patch("/auth/change-password", {
+      await api.post("/auth/change-password", {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
+        otpCode: data.otpCode,
       });
-      toast.success("Mot de passe mis à jour");
-      reset();
+      toast.success("Mot de passe mis à jour. Veuillez vous reconnecter.");
+      window.location.href = "/login";
     } catch {
-      toast.error("Mot de passe actuel incorrect");
+      toast.error("Échec de la mise à jour : vérifiez vos informations");
     }
   };
 
@@ -66,11 +81,11 @@ export function SecuritySettings() {
     { label: "8 caractères minimum", test: (p: string) => p.length >= 8 },
     { label: "Une majuscule", test: (p: string) => /[A-Z]/.test(p) },
     { label: "Un chiffre", test: (p: string) => /[0-9]/.test(p) },
+    { label: "Un caractère spécial (@$!%*?&)", test: (p: string) => /[@$!%*?&]/.test(p) },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Changer mot de passe */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -84,7 +99,6 @@ export function SecuritySettings() {
             noValidate
             className="space-y-4"
           >
-            {/* Mot de passe actuel */}
             <div className="relative">
               <Input
                 label="Mot de passe actuel"
@@ -97,15 +111,10 @@ export function SecuritySettings() {
                 onClick={() => setShowCurrent((v) => !v)}
                 className="absolute right-3 top-8 text-slate-400 hover:text-slate-600"
               >
-                {showCurrent ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
 
-            {/* Nouveau */}
             <div className="relative">
               <Input
                 label="Nouveau mot de passe"
@@ -118,15 +127,10 @@ export function SecuritySettings() {
                 onClick={() => setShowNew((v) => !v)}
                 className="absolute right-3 top-8 text-slate-400 hover:text-slate-600"
               >
-                {showNew ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
 
-            {/* Confirmation */}
             <div className="relative">
               <Input
                 label="Confirmer le nouveau mot de passe"
@@ -139,27 +143,32 @@ export function SecuritySettings() {
                 onClick={() => setShowConfirm((v) => !v)}
                 className="absolute right-3 top-8 text-slate-400 hover:text-slate-600"
               >
-                {showConfirm ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
 
-            <Button
-              type="submit"
-              isLoading={isSubmitting}
-              className="w-full sm:w-auto"
-            >
-              <Lock className="h-4 w-4" />
-              Mettre à jour le mot de passe
-            </Button>
+            {!isOtpRequested ? (
+              <Button type="button" variant="outline" onClick={requestOtp} className="w-full">
+                <Mail className="h-4 w-4 mr-2" />
+                Recevoir un code de sécurité par email
+              </Button>
+            ) : (
+              <div className="space-y-4 pt-4 border-t">
+                <Input
+                  label="Code de vérification (OTP)"
+                  placeholder="000000"
+                  error={errors.otpCode?.message}
+                  {...register("otpCode")}
+                />
+                <Button type="submit" isLoading={isSubmitting} className="w-full">
+                  Mettre à jour le mot de passe
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
-
-      {/* Règles de sécurité */}
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -177,8 +186,7 @@ export function SecuritySettings() {
           <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-100 flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-xs text-amber-700 leading-relaxed">
-              Après modification, toutes vos sessions actives seront invalidées
-              et vous devrez vous reconnecter.
+              Après modification, toutes vos sessions actives seront invalidées et vous devrez vous reconnecter.
             </p>
           </div>
         </CardContent>

@@ -362,8 +362,8 @@ export default function DefensePage() {
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-800 line-clamp-2 flex-1 tracking-[-0.02em]">
-                      {defense.project?.title ?? "Projet sans titre"}
+                    <p className="text-sm font-semibold text-slate-800 flex-1 tracking-[-0.02em]">
+                      {(defense.project as { title: string } | undefined)?.title || "Projet sans titre"}
                     </p>
                     <span
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold shrink-0"

@@ -120,10 +120,7 @@ function DecisionModal({
     >
       <div className="space-y-5">
         {/* Résumé sujet */}
-        <div
-          className="rounded-xl p-4 space-y-2.5"
-          style={{ background: "#F6F8FA", border: "1px solid #E8ECF0" }}
-        >
+        <div className="rounded-xl p-4 space-y-2.5 bg-[#F6F8FA] border border-[#E8ECF0]">
           <div className="flex items-center gap-2 flex-wrap">
             {/* Type badge */}
             <span
@@ -167,23 +164,16 @@ function DecisionModal({
         </div>
 
         {/* Toggle Valider / Refuser */}
-        <div
-          className="flex rounded-xl overflow-hidden p-1"
-          style={{ background: "#F6F8FA", border: "1px solid #E8ECF0" }}
-        >
+        <div className="flex rounded-xl overflow-hidden p-1 bg-[#F6F8FA] border border-[#E8ECF0]">
           <button
             type="button"
             onClick={() => setAction("APPROVE")}
-            className="flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all"
-            style={
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all",
               action === "APPROVE"
-                ? {
-                    background: "linear-gradient(135deg, #1B8A5A, #156e48)",
-                    color: "#fff",
-                    boxShadow: "0 2px 8px -2px rgb(27 138 90/0.30)",
-                  }
-                : { color: "#64748b" }
-            }
+                ? "bg-[linear-gradient(135deg,#1B8A5A,#156e48)] text-white shadow-[0_2px_8px_-2px_rgb(27_138_90/0.30)]"
+                : "text-slate-500 hover:text-slate-700",
+            )}
           >
             <CheckCircle2 className="h-4 w-4" />
             Valider
@@ -191,16 +181,12 @@ function DecisionModal({
           <button
             type="button"
             onClick={() => setAction("REJECT")}
-            className="flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all"
-            style={
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all",
               action === "REJECT"
-                ? {
-                    background: "#dc2626",
-                    color: "#fff",
-                    boxShadow: "0 2px 8px -2px rgb(220 38 38/0.30)",
-                  }
-                : { color: "#64748b" }
-            }
+                ? "bg-red-600 text-white shadow-[0_2px_8px_-2px_rgb(220_38_38/0.30)]"
+                : "text-slate-500 hover:text-slate-700",
+            )}
           >
             <XCircle className="h-4 w-4" />
             Refuser
@@ -251,40 +237,37 @@ function DecisionModal({
         )}
 
         {error && (
-          <div
-            className="flex items-center gap-2 rounded-xl p-3 text-xs overflow-hidden relative"
-            style={{ background: "#fff1f2", border: "1px solid #fecaca" }}
-          >
+          <div className="flex items-center gap-2 rounded-xl p-3 text-xs overflow-hidden relative bg-red-50 border border-red-200 text-red-700">
             <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl bg-red-500" />
-            <AlertCircle className="h-4 w-4 text-red-500 shrink-0 ml-1" />
+            <AlertCircle className="h-4 w-4 shrink-0 ml-1" />
             {error}
           </div>
         )}
-
-        <DialogFooter>
-          <Button variant="secondary" onClick={handleClose}>
-            Annuler
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting}
-            isLoading={submitting}
-            variant={action === "REJECT" ? "danger" : "primary"}
-          >
-            {action === "APPROVE" ? (
-              <>
-                <CheckCircle2 className="h-4 w-4" />
-                Valider le sujet
-              </>
-            ) : (
-              <>
-                <XCircle className="h-4 w-4" />
-                Refuser le sujet
-              </>
-            )}
-          </Button>
-        </DialogFooter>
       </div>
+
+      <DialogFooter className="mt-6">
+        <Button variant="secondary" onClick={handleClose}>
+          Annuler
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting}
+          isLoading={submitting}
+          variant={action === "REJECT" ? "danger" : "primary"}
+        >
+          {action === "APPROVE" ? (
+            <>
+              <CheckCircle2 className="h-4 w-4" />
+              Valider le sujet
+            </>
+          ) : (
+            <>
+              <XCircle className="h-4 w-4" />
+              Refuser le sujet
+            </>
+          )}
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 }

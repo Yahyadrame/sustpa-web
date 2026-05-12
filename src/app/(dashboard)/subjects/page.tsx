@@ -54,16 +54,27 @@ export default function SubjectsPage() {
 
   const [search,     setSearch]     = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"TOUS" | "DISPONIBLE" | "CLOTURE">("TOUS");
+  const [currentPage, setCurrentPage] = useState(1);
   const [applyModal, setApplyModal] = useState<{ open: boolean; id: string; title: string }>({
     open: false, id: "", title: "",
   });
   const [message, setMessage] = useState("");
 
+  const ITEMS_PER_PAGE = 5;
+
   const filtered = (subjects as unknown as SubjectWithApplication[]).filter((s) => {
     const matchSearch = s.title.toLowerCase().includes(search.toLowerCase());
     const matchType   = !typeFilter || s.type === typeFilter;
-    return matchSearch && matchType;
+    const matchStatus = 
+      statusFilter === "TOUS" ? true :
+      statusFilter === "DISPONIBLE" ? s.isAvailable :
+      statusFilter === "CLOTURE" ? s.validationStatus === "CLOSED" : true;
+    return matchSearch && matchType && matchStatus;
   });
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const canCreate = ["TEACHER", "RESPONSIBLE"].includes(user?.role ?? "");
   const canApply  = user?.role === "STUDENT";
@@ -96,44 +107,53 @@ export default function SubjectsPage() {
       />
 
       {/* Filtres */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div
-          className="relative flex-1 max-w-sm flex items-center rounded-xl"
-          style={{ background: "#F6F8FA", border: "1.5px solid #E8ECF0" }}
-        >
-          <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
-          <input
-            type="search"
-            placeholder="Rechercher un sujet…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none font-sans tracking-[-0.01em]"
-            onFocus={(e) => {
-              e.currentTarget.parentElement!.style.borderColor = "#1B8A5A";
-              e.currentTarget.parentElement!.style.boxShadow = "0 0 0 3px rgb(27 138 90/0.10)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.parentElement!.style.borderColor = "#E8ECF0";
-              e.currentTarget.parentElement!.style.boxShadow = "none";
-            }}
-          />
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1">
+          <div
+            className="relative flex-1 max-w-sm flex items-center rounded-xl"
+            style={{ background: "#F6F8FA", border: "1.5px solid #E8ECF0" }}
+          >
+            <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+            <input
+              type="search"
+              placeholder="Rechercher un sujet…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none font-sans tracking-[-0.01em]"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {["", "PFE", "MEMOIRE", "THESE"].map((t) => (
+              <button
+                key={t}
+                onClick={() => { setTypeFilter(t); setCurrentPage(1); }}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={
+                  typeFilter === t
+                    ? { background: "linear-gradient(135deg, #1B8A5A, #156e48)", color: "#fff" }
+                    : { background: "#F6F8FA", border: "1px solid #E8ECF0", color: "#64748b" }
+                }
+              >
+                {t === "" ? "Tous types" : t === "MEMOIRE" ? "Mémoire" : t === "THESE" ? "Thèse" : t}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Chips type */}
         <div className="flex items-center gap-1.5">
-          <Filter className="h-4 w-4 text-slate-400 mr-0.5 shrink-0" />
-          {["", "PFE", "MEMOIRE", "THESE"].map((t) => (
+          {(["TOUS", "DISPONIBLE", "CLOTURE"] as const).map((s) => (
             <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
+              key={s}
+              onClick={() => { setStatusFilter(s); setCurrentPage(1); }}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={
-                typeFilter === t
-                  ? { background: "linear-gradient(135deg, #1B8A5A, #156e48)", color: "#fff" }
+                statusFilter === s
+                  ? { background: "#1B8A5A", color: "#fff" }
                   : { background: "#F6F8FA", border: "1px solid #E8ECF0", color: "#64748b" }
               }
             >
-              {t === "" ? "Tous" : t === "MEMOIRE" ? "Mémoire" : t === "THESE" ? "Thèse" : t}
+              {s === "TOUS" ? "Tous" : s === "DISPONIBLE" ? "Disponible" : "Clôturé"}
             </button>
           ))}
         </div>
@@ -141,14 +161,9 @@ export default function SubjectsPage() {
 
       {/* Contenu */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-[#E8ECF0] bg-white p-5 space-y-3">
-              <div className="flex gap-2"><Skeleton className="h-5 w-14 rounded-full" /><Skeleton className="h-5 w-20 rounded-full" /></div>
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="h-4 w-3/5" />
-              <div className="pt-3 border-t border-[#E8ECF0]"><Skeleton className="h-9 w-full rounded-xl" /></div>
-            </div>
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full rounded-2xl" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -156,15 +171,12 @@ export default function SubjectsPage() {
           <EmptyState
             icon={<BookOpen className="h-8 w-8" />}
             title="Aucun sujet trouvé"
-            description="Aucun sujet disponible pour le moment."
-            action={canCreate ? (
-              <Link href="/subjects/new"><Button variant="primary" size="sm"><Plus className="h-4 w-4" />Proposer un sujet</Button></Link>
-            ) : undefined}
+            description="Essayez de changer vos filtres."
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((subject) => {
+        <div className="space-y-4">
+          {paginated.map((subject) => {
             const isAvailable = subject.validationStatus === "VALIDATED" && subject.isAvailable;
             const appStatus   = subject.myApplicationStatus ?? null;
             const appCfg      = appStatus ? APP_CFG[appStatus] : null;
@@ -174,20 +186,10 @@ export default function SubjectsPage() {
             return (
               <div
                 key={subject.id}
-                className="flex flex-col rounded-2xl bg-white transition-all duration-200 hover:-translate-y-0.5"
-                style={{ border: "1px solid #E8ECF0", boxShadow: "0 0 0 1px rgb(0 0 0/0.03), 0 2px 6px 0 rgb(0 0 0/0.05)" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "#a8e9cb";
-                  e.currentTarget.style.boxShadow = "0 0 0 1px rgb(27 138 90/0.08), 0 8px 20px -4px rgb(0 0 0/0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#E8ECF0";
-                  e.currentTarget.style.boxShadow = "0 0 0 1px rgb(0 0 0/0.03), 0 2px 6px 0 rgb(0 0 0/0.05)";
-                }}
+                className="flex items-center justify-between p-5 rounded-2xl bg-white border border-[#E8ECF0] transition-all duration-200 hover:border-primary-500 hover:shadow-lg"
               >
-                <div className="p-5 space-y-3 flex-1">
-                  {/* Badges */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold"
                       style={{ background: typeCfg.bg, color: typeCfg.text, border: `1px solid ${typeCfg.border}` }}>
                       {typeCfg.label}
@@ -196,42 +198,71 @@ export default function SubjectsPage() {
                       style={{ background: stsCfg.bg, color: stsCfg.text, border: `1px solid ${stsCfg.border}` }}>
                       {stsCfg.label}
                     </span>
-                    {canApply && appCfg && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold"
-                        style={{ background: appCfg.bg, color: appCfg.text, border: `1px solid ${appCfg.border}` }}>
-                        {appCfg.icon}{appCfg.label}
-                      </span>
-                    )}
                   </div>
-
-                  <Link href={`/subjects/${subject.id}`}>
-                    <h3 className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2 hover:text-primary-700 transition-colors cursor-pointer tracking-[-0.02em]">
-                      {subject.title}
-                    </h3>
-                  </Link>
-
-                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
-                    {subject.description}
-                  </p>
+                  <h3 className="text-lg font-semibold text-slate-800">{subject.title}</h3>
+                  <p className="text-sm text-slate-500 line-clamp-1">{subject.description}</p>
                 </div>
 
-                {/* Footer */}
-                <div className="px-5 py-3.5 flex items-center gap-2" style={{ borderTop: "1px solid #E8ECF0" }}>
-                  <Link href={`/subjects/${subject.id}`} className="flex-1">
-                    <Button variant="secondary" size="sm" className="w-full">
-                      <Eye className="h-3.5 w-3.5" />Voir le détail
-                    </Button>
+                <div className="flex items-center gap-3">
+                  <Link href={`/subjects/${subject.id}`}>
+                    <Button variant="secondary" size="sm">Voir</Button>
                   </Link>
                   {canApply && isAvailable && !appStatus && (
-                    <Button variant="primary" size="sm"
-                      onClick={() => setApplyModal({ open: true, id: subject.id, title: subject.title })}>
-                      <Send className="h-3.5 w-3.5" />Postuler
+                    <Button variant="primary" size="sm" onClick={() => setApplyModal({ open: true, id: subject.id, title: subject.title })}>
+                      Postuler
                     </Button>
                   )}
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-1.5 mt-8">
+          <Button 
+            variant="secondary" 
+            size="sm"
+            disabled={currentPage === 1} 
+            onClick={() => setCurrentPage(prev => prev - 1)}
+          >
+            Précédent
+          </Button>
+
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const page = i + 1;
+            // Affiche toujours première, dernière, et les pages proches de la courante
+            if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                    currentPage === page 
+                      ? "bg-primary-600 text-white shadow-sm" 
+                      : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            }
+            if (page === currentPage - 2 || page === currentPage + 2) {
+              return <span key={page} className="px-2 text-slate-400">...</span>;
+            }
+            return null;
+          })}
+
+          <Button 
+            variant="secondary" 
+            size="sm"
+            disabled={currentPage === totalPages} 
+            onClick={() => setCurrentPage(prev => prev + 1)}
+          >
+            Suivant
+          </Button>
         </div>
       )}
 
